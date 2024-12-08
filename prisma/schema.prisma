@@ -13,78 +13,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  MANAGER
-  CASHIER
-}
-
-enum Category {
-  MAKANAN 
-  MINUMAN 
-  SNACK
-}
-
-enum Payment {
-  CASH 
-  QRIS
-}
-
 enum Status {
-  NEW 
-  PAID 
-  DONE 
+  dipinjam
+  kembali
+}
+
+enum Role {
+  siswa
+  karyawan
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  uuid            String   @unique @default("")
-  name            String   @default("")
-  email           String   @unique @default("")
-  password        String   @default("")
-  profile_picture String   @default("")
-  role            Role     @default(CASHIER)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  orderDetail     Order[]
+  id         Int          @id @default(autoincrement())
+  username   String       @unique @default("")
+  password   String       @default("")
+  role       Role         @default(siswa)
+  peminjaman Peminjaman[]
 }
 
-model Menu {
-  id          Int        @id @default(autoincrement())
-  uuid        String     @unique @default("")
-  name        String     @default("")
-  price       Int        @default(0)
-  category    Category   @default(MAKANAN)
-  picture     String     @default("")
-  description String     @default("") @db.Text
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  orderList   OrderList[]
+model Barang {
+  id         Int          @id @default(autoincrement())
+  namaBarang String       @default("")
+  location   String       @default("")
+  category   String       @default("")
+  quantity   Int          @default(0)
+  Peminjaman Peminjaman[]
 }
 
-model Order {
-  id             Int        @id @default(autoincrement())
-  uuid           String     @unique @default("")
-  customer       String     @default("")
-  table_number   String     @default("")
-  totalPrice     Int        @default(0)
-  payment_method Payment    @default(CASH)
-  status         Status     @default(NEW)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  orderList      OrderList[]
-  userId         Int?
-  user           User?      @relation(fields: [userId], references: [id])
-}
-
-model OrderList {
+model Peminjaman {
   id         Int      @id @default(autoincrement())
-  uuid       String   @unique @default("")
-  idOrder    Int?     
-  order      Order?   @relation(fields: [idOrder], references: [id])
-  idMenu     Int? 
+  idUser     Int
+  user       User     @relation(fields: [idUser], references: [id])
+  idBarang   Int
+  barang     Barang?  @relation(fields: [idBarang], references: [id])
   quantity   Int      @default(0)
-  menu       Menu?    @relation(fields: [idMenu], references: [id])
-  note       String   @default("") @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status     Status   @default(dipinjam)
+  borrowDate DateTime @db.Date
+  returnDate DateTime @db.Date
 }
